@@ -17,20 +17,27 @@ the interval and cycle remain the same.
 The clock can be stopped and started at any time.
 
 ```go
+package main
+
 import (
-  "fmt"
-  "github.com/stvp/clock"
-  "time"
+	"fmt"
+	"github.com/stvp/clock"
+	"time"
 )
 
-c := clock.New(100*time.Millisecond, time.Minute)
-c.Add("neat")
-c.Add("dude")
-c.Add("rad")
-c.Start()
+func main() {
+	c, err := clock.New(100*time.Millisecond, time.Minute, 0)
+	if err != nil {
+		panic(err)
+	}
+	c.Add("neat")
+	c.Add("dude")
+	c.Add("rad")
+	c.Start()
 
-for str := <-c.Channel {
-  fmt.Printf("Received: %s\n", str)
+	for str := range <-c.Channel {
+		fmt.Printf("Received: %s\n", str)
+	}
 }
 ```
 
