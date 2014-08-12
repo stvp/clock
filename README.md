@@ -35,7 +35,7 @@ func main() {
 	c.Add("rad")
 	c.Start()
 
-	for str := range <-c.Channel {
+	for str := range c.Channel {
 		fmt.Printf("Received: %s\n", str)
 	}
 }
