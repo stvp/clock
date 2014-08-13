@@ -30,49 +30,55 @@ func New(tick, cycle time.Duration) (clock *Clock, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	slots := make([]map[string]zilch, slotCount)
 	for i := range slots {
 		slots[i] = map[string]zilch{}
 	}
+
 	clock = &Clock{
 		Channel:     make(chan string),
 		tick:        tick,
 		slots:       slots,
 		currentSlot: 0,
 	}
-	return clock, nil
-}
 
-// slotIndex returns the slot index for the given key.
-func (c *Clock) slotIndex(key string) uint64 {
-	return crc64.Checksum([]byte(key), hashTable) % uint64(len(c.slots))
+	return clock, nil
 }
 
 func (c *Clock) Add(key string) error {
 	index := c.slotIndex(key)
-	if _, found := c.slots[index][key]; found {
+	_, found := c.slots[index][key]
+	if found {
 		return errors.New(fmt.Sprintf("%v already exists on the clock at position %d", key, index))
 	}
+
 	c.slots[index][key] = zilch{}
+
 	return nil
 }
 
 func (c *Clock) Remove(key string) error {
 	index := c.slotIndex(key)
-	if _, found := c.slots[index][key]; !found {
+	_, found := c.slots[index][key]
+	if !found {
 		return errors.New(fmt.Sprintf("%v couldn't be found in the clock", key))
 	}
+
 	delete(c.slots[index], key)
+
 	return nil
 }
 
 func (c *Clock) Keys() (keys []string) {
 	keys = []string{}
+
 	for _, slot := range c.slots {
 		for key, _ := range slot {
 			keys = append(keys, key)
 		}
 	}
+
 	return keys
 }
 
@@ -97,5 +103,9 @@ func (c *Clock) Stop() {
 	if c.ticker != nil {
 		c.ticker.Stop()
 	}
-	// TODO: Stop the goroutine started in Start().
+}
+
+// slotIndex returns the slot index for the given key.
+func (c *Clock) slotIndex(key string) uint64 {
+	return crc64.Checksum([]byte(key), hashTable) % uint64(len(c.slots))
 }
