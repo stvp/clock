@@ -35,7 +35,7 @@ func TestSlotIndex(t *testing.T) {
 }
 
 func TestStartAndStop(t *testing.T) {
-	clock, _ := New(10*time.Millisecond, 50*time.Millisecond)
+	clock, _ := New(20*time.Millisecond, 100*time.Millisecond)
 	received := []string{}
 	go func() {
 		for {
@@ -49,10 +49,10 @@ func TestStartAndStop(t *testing.T) {
 
 	clock.Start()
 
-	halfCycle := time.After(25 * time.Millisecond)
-	fullCycle := time.After(50 * time.Millisecond)
-	oneAndHalfCycles := time.After(75 * time.Millisecond)
-	twoCycles := time.After(100 * time.Millisecond)
+	halfCycle := time.After(50 * time.Millisecond)
+	fullCycle := time.After(100 * time.Millisecond)
+	oneAndHalfCycles := time.After(150 * time.Millisecond)
+	twoCycles := time.After(200 * time.Millisecond)
 
 test:
 	for {

@@ -15,7 +15,7 @@ var (
 )
 
 // A zilch takes up 0 bytes of space.
-type zilch struct{}
+type zilch interface{}
 
 type Clock struct {
 	Channel     chan string
@@ -53,7 +53,7 @@ func (c *Clock) Add(key string) error {
 		return errors.New(fmt.Sprintf("%v already exists on the clock at position %d", key, index))
 	}
 
-	c.slots[index][key] = zilch{}
+	c.slots[index][key] = nil
 
 	return nil
 }
