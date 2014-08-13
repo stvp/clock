@@ -25,10 +25,7 @@ type Clock struct {
 	currentSlot int
 }
 
-func New(tick, cycle time.Duration, bufferSize uint) (clock *Clock, err error) {
-	if bufferSize < 1 {
-		return nil, fmt.Errorf("Channel buffer size must be greater than 0 (got %d)", bufferSize)
-	}
+func New(tick, cycle time.Duration) (clock *Clock, err error) {
 	slotCount, err := ticksPerCycle(tick, cycle)
 	if err != nil {
 		return nil, err
@@ -38,7 +35,7 @@ func New(tick, cycle time.Duration, bufferSize uint) (clock *Clock, err error) {
 		slots[i] = map[string]zilch{}
 	}
 	clock = &Clock{
-		Channel:     make(chan string, bufferSize),
+		Channel:     make(chan string),
 		tick:        tick,
 		slots:       slots,
 		currentSlot: 0,
@@ -79,12 +76,9 @@ func (c *Clock) Keys() (keys []string) {
 	return keys
 }
 
-func (c *Clock) doTick() {
-	c.currentSlot = (c.currentSlot + 1) % len(c.slots)
-	for key, _ := range c.slots[c.currentSlot] {
-		if len(c.Channel) < cap(c.Channel) {
-			c.Channel <- key
-		}
+func (c *Clock) doTick(index int) {
+	for key, _ := range c.slots[index] {
+		c.Channel <- key
 	}
 }
 
@@ -92,9 +86,9 @@ func (c *Clock) Start() {
 	c.Stop()
 	c.ticker = time.NewTicker(c.tick)
 	go func() {
-		for {
-			<-c.ticker.C
-			c.doTick()
+		for _ = range c.ticker.C {
+			c.currentSlot = (c.currentSlot + 1) % len(c.slots)
+			go func(index int) { c.doTick(index) }(c.currentSlot)
 		}
 	}()
 }

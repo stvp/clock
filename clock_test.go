@@ -8,25 +8,22 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	_, err := New(time.Millisecond, time.Second, 0)
+	_, err := New(7*time.Millisecond, time.Second)
 	assert.NotNil(t, err)
 
-	_, err = New(7*time.Millisecond, time.Second, 1)
-	assert.NotNil(t, err)
-
-	_, err = New(time.Minute, time.Second, 1)
+	_, err = New(time.Minute, time.Second)
 	assert.NotNil(t, err)
 }
 
 func TestSlotIndex(t *testing.T) {
-	clock, err := New(time.Millisecond, time.Minute, 1)
+	clock, err := New(time.Millisecond, time.Minute)
 	assert.Nil(t, err)
 	assert.Equal(t, uint64(0), clock.slotIndex(""))
 	assert.Equal(t, uint64(42695), clock.slotIndex("lol"))
 	assert.Equal(t, uint64(44594), clock.slotIndex("omg"))
 
 	// Check for a even distribution
-	clock, err = New(6*time.Second, time.Minute, 1)
+	clock, err = New(6*time.Second, time.Minute)
 	assert.Nil(t, err)
 	counts := make([]int, 10)
 	for i := 0; i < 200; i++ {
@@ -38,7 +35,7 @@ func TestSlotIndex(t *testing.T) {
 }
 
 func TestStartAndStop(t *testing.T) {
-	clock, _ := New(10*time.Millisecond, 50*time.Millisecond, 4)
+	clock, _ := New(10*time.Millisecond, 50*time.Millisecond)
 	received := []string{}
 	go func() {
 		for {
@@ -74,19 +71,8 @@ test:
 	}
 }
 
-func TestBufferSize(t *testing.T) {
-	clock, _ := New(time.Millisecond, 2*time.Millisecond, 3)
-	clock.Add("foo")
-	clock.Add("biz")
-	clock.Add("baz")
-	clock.doTick()
-	clock.doTick()
-
-	assert.Equal(t, 3, len(clock.Channel))
-}
-
 func TestKeys(t *testing.T) {
-	clock, _ := New(10*time.Millisecond, 50*time.Millisecond, 1)
+	clock, _ := New(10*time.Millisecond, 50*time.Millisecond)
 	clock.Add("foo") // slot 1
 	clock.Add("biz") // slot 2
 	clock.Add("baz") // slot 2
